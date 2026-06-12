@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{02EA681E-C7D
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{8D5643CD-008A-4E49-819F-4D97366399D6}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflow", "workflow", "{D7C89D45-02DF-4284-A94E-952820C80667}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{D7C89D45-02DF-4284-A94E-952820C80667}"
 	ProjectSection(SolutionItems) = preProject
 		dotnet-ci.yml = dotnet-ci.yml
 	EndProjectSection
