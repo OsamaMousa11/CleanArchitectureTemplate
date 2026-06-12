@@ -18,7 +18,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CleanArchitectureTemplate.A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CleanArchitectureTemplate.Domain", "src\CleanArchitectureTemplate.Domain\CleanArchitectureTemplate.Domain.csproj", "{DD2EEED6-FB91-2D25-8BBC-1E243E264C27}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CleanArchitectureTemplate.Infrastructure", "src\CleanArchitectureTemplate.infrastructure\CleanArchitectureTemplate.Infrastructure.csproj", "{39F3FF56-6554-3700-74BF-AF689DE4FE61}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CleanArchitectureTemplate.Infrastructure", "src\CleanArchitectureTemplate.Infrastructure\CleanArchitectureTemplate.Infrastructure.csproj", "{39F3FF56-6554-3700-74BF-AF689DE4FE61}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
