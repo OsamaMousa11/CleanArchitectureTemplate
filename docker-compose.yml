@@ -1,1 +1,44 @@
-﻿
+﻿services:
+  api:
+    build:
+      context: .
+      dockerfile: src/CleanArchitectureTemplate.Api/Dockerfile
+    ports:
+      - "5000:8080"
+    depends_on:
+      - cache-redis
+      - db-sqlserver
+    environment:
+      - ConnectionStrings__Redis=cache-redis:6379
+      - ConnectionStrings__connstr=Server=db-sqlserver;Database=CleanArchitectureTemplate;User Id=sa;Password=YourSecurePassword@2026;TrustServerCertificate=True;MultipleActiveResultSets=True
+      - JWT__Key=MySuperSecretKey123456789123456789
+      - JWT__Issuer=SecureApi
+      - JWT__Audience=SecureApiUser
+      - JWT__DurationInDays=30
+      - MailSettings__Email=a7dbca001@smtp-brevo.com
+      - MailSettings__SenderEmail=karakeb121@gmail.com
+      - MailSettings__DisplayName=Crm
+      - MailSettings__Password=xsmtpsib-07a0d83230f225e3ab663acbc0dfbd9e3a813dfcdcb64e942767a65dd1f7fb13-iUASgwxj8Jq32VRQ
+      - MailSettings__Host=smtp-relay.brevo.com
+      - MailSettings__Port=587
+      - AdminUser__Email=osamaomr1995@gmail.com
+      - AdminUser__Password=osama@3030
+      - AdminUser__Name=Crm
+
+  cache-redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  db-sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=YourSecurePassword@2026
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql
+
+volumes:
+  mssql_data:

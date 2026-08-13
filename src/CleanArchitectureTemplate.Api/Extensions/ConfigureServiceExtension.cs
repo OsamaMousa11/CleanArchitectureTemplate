@@ -1,5 +1,7 @@
 using FluentValidation;
 using Karaakeb.Core.DTO.AuthenticationDTO;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -47,11 +49,18 @@ public static class ConfigureServiceExtension
             .AddUserStore<UserStore<ApplicationUser, ApplicationRole, AppDbContext, Guid>>()
             .AddRoleStore<RoleStore<ApplicationRole, AppDbContext, Guid>>();
 
-        // ✅ JWT Authentication
+        // ✅ JWT + Cookie (for OAuth correlation) + Google
         services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            })
+            .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+            {
+                options.Cookie.Name = "ExternalAuth";
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+                options.Cookie.SameSite = SameSiteMode.Lax;
             })
             .AddJwtBearer(options =>
             {
@@ -87,6 +96,16 @@ public static class ConfigureServiceExtension
                         Encoding.UTF8.GetBytes(configuration["JWT:Key"] ?? "default_secret_key_for_development_only")),
                     ClockSkew = TimeSpan.Zero
                 };
+            })
+            .AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
+            {
+                options.ClientId = configuration["Authentication:Google:ClientId"]
+                    ?? throw new InvalidOperationException("Google ClientId is missing.");
+                options.ClientSecret = configuration["Authentication:Google:ClientSecret"]
+                    ?? throw new InvalidOperationException("Google ClientSecret is missing.");
+                options.CallbackPath = configuration["Authentication:Google:CallbackPath"] ?? "/signin-google";
+                options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.SaveTokens = true;
             });
 
         // ✅ CORS

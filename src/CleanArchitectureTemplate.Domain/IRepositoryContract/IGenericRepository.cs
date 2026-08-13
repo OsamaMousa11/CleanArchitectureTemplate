@@ -48,5 +48,15 @@ namespace CleanArchitectureTemplate_Domain.IRepositoryContract
             string? includeProperties = null,
             CancellationToken cancellationToken = default
         );
+
+        // New Paging Method with Total Count
+        Task<(IEnumerable<T> Data, int TotalCount)> GetPagedWithCountAsync(
+            int pageNumber = 1,
+            int pageSize = 10,
+            Expression<Func<T, bool>>? predicate = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+            string? includeProperties = null,
+            CancellationToken cancellationToken = default
+        );
     }
 }

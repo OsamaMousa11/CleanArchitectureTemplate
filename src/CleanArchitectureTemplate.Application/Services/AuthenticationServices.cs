@@ -151,6 +151,120 @@ namespace CleanArchitectureTemplate_Application.Services
             return authResponse;
         }
 
+        public async Task<AuthenticationResponse> ExternalLoginAsync(
+            string provider, string providerKey, string email, string? name)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return new AuthenticationResponse
+                {
+                    Message = "Email was not returned by the external provider.",
+                    IsAuthenticated = false
+                };
+
+            var user = await _userManager.FindByLoginAsync(provider, providerKey);
+
+            if (user is null)
+            {
+                user = await _userManager.FindByEmailAsync(email);
+
+                if (user is null)
+                {
+                    var userName = await GenerateUniqueUserNameAsync(name ?? email.Split('@')[0]);
+
+                    user = new ApplicationUser
+                    {
+                        UserName = userName,
+                        Email = email,
+                        FullName = name ?? userName,
+                        EmailConfirmed = true
+                    };
+
+                    var createResult = await _userManager.CreateAsync(user);
+                    if (!createResult.Succeeded)
+                        return new AuthenticationResponse
+                        {
+                            Message = string.Join(" | ", createResult.Errors.Select(e => e.Description)),
+                            IsAuthenticated = false
+                        };
+
+                    const string roleName = "USER";
+                    if (!await _roleManager.RoleExistsAsync(roleName))
+                        await _roleManager.CreateAsync(new ApplicationRole { Name = roleName });
+
+                    await _userManager.AddToRoleAsync(user, roleName);
+                }
+                else if (!user.EmailConfirmed)
+                {
+                    user.EmailConfirmed = true;
+                    await _userManager.UpdateAsync(user);
+                }
+
+                var addLoginResult = await _userManager.AddLoginAsync(
+                    user, new UserLoginInfo(provider, providerKey, provider));
+
+                if (!addLoginResult.Succeeded &&
+                    addLoginResult.Errors.All(e => e.Code != "LoginAlreadyAssociated"))
+                {
+                    return new AuthenticationResponse
+                    {
+                        Message = string.Join(" | ", addLoginResult.Errors.Select(e => e.Description)),
+                        IsAuthenticated = false
+                    };
+                }
+            }
+
+            if (user.IsSuspended)
+                return new AuthenticationResponse
+                {
+                    Message = $"Account is suspended. Reason: {user.SuspendReason ?? "Contact technical support."}",
+                    ErrorField = "account",
+                    IsAuthenticated = false
+                };
+
+            var authResponse = await GenerateJwtToken(user);
+
+            if (user.RefreshTokens != null && user.RefreshTokens.Any(x => x.IsActive))
+            {
+                var activeToken = user.RefreshTokens.First(x => x.IsActive);
+                authResponse.RefreshToken = activeToken.Token;
+                authResponse.RefreshTokenExpiration = activeToken.ExpiredOn;
+            }
+            else
+            {
+                var newRefreshToken = GenerateRefreshToken();
+                authResponse.RefreshToken = newRefreshToken.Token;
+                authResponse.RefreshTokenExpiration = newRefreshToken.ExpiredOn;
+
+                if (user.RefreshTokens == null)
+                    user.RefreshTokens = new List<RefreshToken>();
+
+                user.RefreshTokens.Add(newRefreshToken);
+                await _userManager.UpdateAsync(user);
+            }
+
+            return authResponse;
+        }
+
+        private async Task<string> GenerateUniqueUserNameAsync(string baseName)
+        {
+            var sanitized = new string(baseName
+                .Where(c => char.IsLetterOrDigit(c) || c == '_' || c == '-')
+                .ToArray());
+
+            if (string.IsNullOrWhiteSpace(sanitized))
+                sanitized = "user";
+
+            var userName = sanitized;
+            var suffix = 1;
+            while (await _userManager.FindByNameAsync(userName) != null)
+            {
+                userName = $"{sanitized}{suffix}";
+                suffix++;
+            }
+
+            return userName;
+        }
+
         public async Task<AuthenticationResponse> RefreshTokenAsync(string token)
         {
             var user = _userManager.Users

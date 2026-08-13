@@ -15,7 +15,7 @@ namespace CleanArchitectureTemplate_infrastructure.Repositories
     {
         protected readonly AppDbContext _context;
         protected readonly DbSet<T> _dbSet;
-
+                
         public GenericRepository(AppDbContext context)
         {
             _context = context;
@@ -42,7 +42,7 @@ namespace CleanArchitectureTemplate_infrastructure.Repositories
             }
             return query;
         }
-        #endregion
+        #endregion          
 
         #region Get / Find
 
@@ -106,7 +106,7 @@ namespace CleanArchitectureTemplate_infrastructure.Repositories
 
         public virtual void Update(T entity)
         {
-            _dbSet.Update(entity); // ✅ بدل Attach
+            _dbSet.Update(entity);
         }
 
 
@@ -175,6 +175,11 @@ namespace CleanArchitectureTemplate_infrastructure.Repositories
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync(cancellationToken);
+        }
+
+        public Task<(IEnumerable<T> Data, int TotalCount)> GetPagedWithCountAsync(int pageNumber = 1, int pageSize = 10, Expression<Func<T, bool>>? predicate = null, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, string? includeProperties = null, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
         }
 
         #endregion

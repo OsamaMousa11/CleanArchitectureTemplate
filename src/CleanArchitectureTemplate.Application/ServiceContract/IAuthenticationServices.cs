@@ -12,6 +12,7 @@ namespace CleanArchitectureTemplate_Application.ServiceContract
     {
         Task RegisterAsync(RegisterDTO registerDTO); // Task
         Task<AuthenticationResponse> LoginAsync(LoginDTO loginDTO);
+        Task<AuthenticationResponse> ExternalLoginAsync(string provider, string providerKey, string email, string? name);
         Task<AuthenticationResponse> RefreshTokenAsync(string token);
         Task<AuthenticationResponse> GenerateJwtToken(ApplicationUser user);
         Task RevokeTokenAsync(string token); // Task
